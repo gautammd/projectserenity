@@ -6,7 +6,6 @@ from graphql_auth import mutations
 
 class Query( 
     MeQuery,
-    #users.schema.Query,
     graphene.ObjectType
 ):
     # This class will inherit from multiple Queries
@@ -35,7 +34,6 @@ class AuthMutation(graphene.ObjectType):
 
 class Mutation(
     AuthMutation,
-    #users.schema.Mutation,
     graphene.ObjectType
 ):
     # This class will inherit from multiple Mutations
