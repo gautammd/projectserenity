@@ -15,6 +15,8 @@ services:
   database:
     image: postgres
     hostname: database
+    ports:
+      - 5432:5432
     env_file:
       - ./.env.dev
   nginx:

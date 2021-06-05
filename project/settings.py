@@ -21,6 +21,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
+     # refresh tokens are optional
+    'graphql_jwt.refresh_token.apps.RefreshTokenConfig',
+    'graphql_auth',
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -60,8 +63,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('POSTGRES_DB', default='serenity'),
-        'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'USER': os.environ.get('POSTGRES_USER',default="postgresadmin"),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD',default="Admin23#@@!"),
         'HOST': os.environ.get('POSTGRES_HOST', default='127.0.0.1'),
         'PORT': int(os.environ.get('POSTGRES_PORT', default=5432)),
 
@@ -112,6 +115,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, os.environ.get('STATIC_ROOT', default='stat
 GRAPHENE = {
     "SCHEMA": "project.schema.schema",
     "ATOMIC_MUTATIONS": True,
+    'MIDDLEWARE': [
+        'graphql_jwt.middleware.JSONWebTokenMiddleware',
+    ],
 }
 
 CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', default=False)
@@ -120,3 +126,49 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', default='#um2g($a1-#2d(enmn!3pm
 ENV_ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS')
 ALLOWED_HOSTS = ENV_ALLOWED_HOSTS.split(',') if ENV_ALLOWED_HOSTS is not None else []
 DEBUG = bool(strtobool(os.environ.get('DEBUG', default='True')))
+
+
+AUTH_USER_MODEL = 'users.User'
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+
+AUTHENTICATION_BACKENDS = [
+    #'graphql_jwt.backends.JSONWebTokenBackend',
+    "graphql_auth.backends.GraphQLAuthBackend",
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+GRAPHQL_JWT = {
+    "JWT_VERIFY_EXPIRATION": True,
+
+    # optional
+    "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
+
+    "JWT_ALLOW_ANY_CLASSES": [
+        "graphql_auth.mutations.Register",
+        "graphql_auth.mutations.VerifyAccount",
+        "graphql_auth.mutations.ResendActivationEmail",
+        "graphql_auth.mutations.SendPasswordResetEmail",
+        "graphql_auth.mutations.PasswordReset",
+        "graphql_auth.mutations.ObtainJSONWebToken",
+        "graphql_auth.mutations.VerifyToken",
+        "graphql_auth.mutations.RefreshToken",
+        "graphql_auth.mutations.RevokeToken",
+        "graphql_auth.mutations.VerifySecondaryEmail",
+    ],
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+GRAPHQL_AUTH = {
+    'LOGIN_ALLOWED_FIELDS': ['email'],
+    'USER_NODE_EXCLUDE_FIELDS': ["password", "is_superuser","username"],
+    'REGISTER_MUTATION_FIELDS': ["email","password1","password2"],
+    'USER_NODE_FILTER_FIELDS': {
+        "email": ["exact",],
+        "is_active": ["exact"],
+        "status__archived": ["exact"],
+        "status__verified": ["exact"],
+        "status__secondary_email": ["exact"],
+    }
+}
