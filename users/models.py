@@ -35,7 +35,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(verbose_name='Email', unique=True, max_length=255)
     first_name = models.CharField(verbose_name='First name', max_length=30)
     last_name = models.CharField(verbose_name='Last name', max_length=30)
-    avatar = models.ImageField(verbose_name='Avatar', blank=True)
     phone = models.CharField(max_length=15, blank=True)
 
     is_admin = models.BooleanField(verbose_name='Admin', default=False)
